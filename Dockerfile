@@ -1,17 +1,29 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.22-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum ./
+FROM golang:1.24-alpine AS builder
+
+WORKDIR /src
+
+COPY go-auth ./go-auth
+
+WORKDIR /src/go-auth
+
 RUN go mod download
-COPY . .
+
 RUN go install github.com/swaggo/swag/cmd/swag@latest
-RUN swag init --parseDependency --parseInternal -g cmd/go-auth/main.go || true
-RUN go build -o go-auth ./cmd/go-auth
+RUN swag init --parseInternal -g cmd/go-auth/main.go
+
+RUN CGO_ENABLED=0 go build -o /go/bin/go-auth ./cmd/go-auth
 
 FROM alpine:latest
 WORKDIR /app
-COPY --from=builder /app/go-auth ./go-auth
-COPY --from=builder /app/docs ./docs
+
+COPY --from=builder /go/bin/go-auth ./go-auth
+
+COPY --from=builder /src/go-auth/docs ./docs
+COPY --from=builder /src/go-auth/migrations ./migrations
+
 COPY .env .env
-EXPOSE 8080
+
+EXPOSE 8080 
+
 CMD ["./go-auth"] 

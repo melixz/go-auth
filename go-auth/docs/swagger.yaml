@@ -1,9 +1,131 @@
 basePath: /
+definitions:
+  handlers.ErrorResponse:
+    properties:
+      error:
+        example: invalid token
+        type: string
+    type: object
+  handlers.MeResponse:
+    properties:
+      user_id:
+        example: b3e1c2d4-5678-4a9b-8c2d-1234567890ab
+        type: string
+    type: object
+  handlers.RefreshRequest:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  handlers.TokenPairResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...
+        type: string
+      refresh_token:
+        example: dGhpc2lzYXJlZnJlc2h0b2tlbg
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
   description: Сервис аутентификации (Go, PostgreSQL, Docker)
   title: Auth API
   version: "1.0"
-paths: {}
+paths:
+  /logout:
+    post:
+      description: Отзывает текущий access/refresh токен
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Деавторизация
+      tags:
+      - auth
+  /me:
+    get:
+      description: Защищённый эндпоинт. Требуется Bearer access-токен.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить GUID текущего пользователя
+      tags:
+      - users
+  /tokens:
+    post:
+      description: Выдаёт access и refresh токены для пользователя с указанным GUID
+      parameters:
+      - description: GUID пользователя
+        in: query
+        name: user_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TokenPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Получить пару токенов
+      tags:
+      - tokens
+  /tokens/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Принимает действующую пару access+refresh, выдаёт новую пару
+      parameters:
+      - description: Пара токенов
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TokenPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Обновить пару токенов
+      tags:
+      - tokens
 swagger: "2.0"
