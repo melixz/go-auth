@@ -7,6 +7,7 @@ toolchain go1.24.4
 require (
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/joho/godotenv v1.5.1
+	github.com/kataras/jwt v0.1.15
 )
 
 require (
