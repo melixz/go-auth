@@ -12,4 +12,5 @@ type RefreshToken struct {
 	IP         string    `json:"ip"`
 	CreatedAt  time.Time `json:"created_at"`
 	Revoked    bool      `json:"revoked"`
+	Used       bool      `json:"used"`
 }
