@@ -29,5 +29,8 @@ func SendWebhook(userID, oldIP, newIP, userAgent string) {
 		Timestamp: time.Now().Unix(),
 	}
 	jsonData, _ := json.Marshal(payload)
-	http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
+	_, err := http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return
+	}
 }

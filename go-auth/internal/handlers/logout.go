@@ -6,7 +6,14 @@ import (
 	"strings"
 )
 
-// LogoutHandler POST /logout (деавторизация)
+// LogoutHandler деавторизует пользователя
+// @Summary      Деавторизация
+// @Description  Отзывает текущий access/refresh токен
+// @Security     ApiKeyAuth
+// @Tags         auth
+// @Success      204  "No Content"
+// @Failure      401  {object}  ErrorResponse
+// @Router       /logout [post]
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {

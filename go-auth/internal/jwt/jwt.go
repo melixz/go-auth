@@ -37,7 +37,7 @@ func ValidateAccessToken(token string) (*models.AccessTokenClaims, error) {
 		return nil, err
 	}
 	if claims.Expiry < time.Now().Unix() {
-		return nil, errors.New("token expired")
+		return nil, errors.New("токен просрочен")
 	}
 	return &claims, nil
 }
